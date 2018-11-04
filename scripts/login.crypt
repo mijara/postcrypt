@@ -1,0 +1,10 @@
+load settings.crypt
+
+post http://www.mocky.io/v2/5bdf7a4231000018149e4038
+{
+    "rut": "00000000-K",
+    "password": "admin"
+}
+
+var token = {{response.token}}
+set Authorization = Bearer {{token}}
