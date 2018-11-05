@@ -1,9 +1,11 @@
 load _settings.crypt
 
+input password
+
 post {{host}}/users/login
 {
     "rut": "00000000-K",
-    "password": "admin"
+    "password": "{{password}}"
 }
 
 header Authorization = Bearer {{response.token}}

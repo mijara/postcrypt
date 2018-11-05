@@ -49,3 +49,8 @@ class LogStatement:
     def __init__(self, tag, text):
         self.tag = tag
         self.text = text
+
+
+class InputStatement:
+    def __init__(self, variable):
+        self.variable = variable

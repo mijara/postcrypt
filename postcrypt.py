@@ -61,6 +61,8 @@ class Postcrypt:
             self.handle_header_statement(statement)
         elif isinstance(statement, statements.LogStatement):
             self.handle_log_statement(statement)
+        elif isinstance(statement, statements.InputStatement):
+            self.handle_input_statement(statement)
 
     def handle_load_statement(self, load_statement):
         parser = Parser(os.path.join(self.base_path, load_statement.file_path))
@@ -121,6 +123,11 @@ class Postcrypt:
         self.log('LOG', statement.tag, '>>>')
         print(text)
 
+    def handle_input_statement(self, statement):
+        self.log('INPUT', f'{statement.variable}:', '', end='')
+        value = input()
+        self.context[statement.variable] = value
+
     def load_file(self, file_path):
         parser = Parser(file_path)
 
@@ -136,8 +143,8 @@ class Postcrypt:
         context.update(self.headers)
         return pystache.render(value, context)
 
-    def log(self, verb, bold, rest):
-        print(colored(verb.upper().ljust(self.just), 'yellow'), colored(bold, attrs=['bold']), rest)
+    def log(self, verb, bold, rest, end='\n'):
+        print(colored(verb.upper().ljust(self.just), 'yellow'), colored(bold, attrs=['bold']), rest, end=end)
 
     def error(self, rest):
         print(colored('error'.upper().ljust(self.just), 'red', attrs=['bold']), rest)

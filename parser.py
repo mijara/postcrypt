@@ -17,6 +17,11 @@ class Parser:
 
                 return token.strip()
 
+        # clear the last token in the file.
+        if token:
+            self.text = ''
+            return token.strip()
+
         raise ValueError('incomplete file')
 
     def next_line(self):
@@ -30,15 +35,15 @@ class Parser:
                 token += c
 
     def parse_json(self):
-        json_token = ''
+        complete_token = ''
 
         while True:
             token = self.next_line()
 
             if not token:
-                return json_token
+                return complete_token
             else:
-                json_token += token
+                complete_token += token
 
     def parse_post(self):
         url = self.next_token()
@@ -48,9 +53,9 @@ class Parser:
 
     def parse_put(self):
         url = self.next_token()
-        json_token = self.parse_json()
+        data = self.parse_json()
 
-        return statements.PutStatement(url, json_token)
+        return statements.PutStatement(url, data)
 
     def parse_delete(self):
         url = self.next_token()
@@ -75,6 +80,11 @@ class Parser:
 
         return statements.HeaderStatement(key, value)
 
+    def parse_input(self):
+        variable = self.next_token()
+
+        return statements.InputStatement(variable)
+
     def parse_load(self):
         file_path = self.next_line()
 
@@ -97,6 +107,8 @@ class Parser:
             return self.parse_delete()
         elif token == 'get':
             return self.parse_get()
+        elif token == 'input':
+            return self.parse_input()
         elif token == 'load':
             return self.parse_load()
         elif token == 'var':
