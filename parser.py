@@ -46,6 +46,17 @@ class Parser:
 
         return statements.PostStatement(url, json_token)
 
+    def parse_put(self):
+        url = self.next_token()
+        json_token = self.parse_json()
+
+        return statements.PutStatement(url, json_token)
+
+    def parse_delete(self):
+        url = self.next_token()
+
+        return statements.DeleteStatement(url)
+
     def parse_get(self):
         url = self.next_token()
         return statements.GetStatement(url)
@@ -57,31 +68,45 @@ class Parser:
 
         return statements.VariableStatement(name, value)
 
-    def parse_set(self):
+    def parse_header(self):
         key = self.next_token()
         assert self.next_token() == '='
         value = self.next_line()
 
-        return statements.SetStatement(key, value)
+        return statements.HeaderStatement(key, value)
 
     def parse_load(self):
         file_path = self.next_line()
 
         return statements.LoadStatement(file_path)
 
+    def parse_log(self):
+        tag = self.next_token()
+        text = self.next_line()
+
+        return statements.LogStatement(tag, text)
+
     def parse_statement(self):
         token = self.next_token()
 
         if token == 'post':
             return self.parse_post()
+        elif token == 'put':
+            return self.parse_put()
+        elif token == 'delete':
+            return self.parse_delete()
         elif token == 'get':
             return self.parse_get()
         elif token == 'load':
             return self.parse_load()
         elif token == 'var':
             return self.parse_var()
-        elif token == 'set':
-            return self.parse_set()
+        elif token == 'header':
+            return self.parse_header()
+        elif token == 'log':
+            return self.parse_log()
+        elif token:
+            raise Parser.ParseError(f'unexpected token {token}')
 
     def process(self):
         statements = []
@@ -93,3 +118,6 @@ class Parser:
                 statements.append(statement)
 
         return statements
+
+    class ParseError(Exception):
+        pass

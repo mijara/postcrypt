@@ -1,0 +1,3 @@
+load users.login.crypt
+
+delete {{host}}/users/5be084aadad9db16c1033df9

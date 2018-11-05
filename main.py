@@ -1,5 +1,7 @@
+import sys
+
 from postcrypt import Postcrypt
 
 if __name__ == '__main__':
-    postcrypt = Postcrypt('scripts/get-transactions.crypt')
+    postcrypt = Postcrypt(sys.argv[1])
     postcrypt.process()

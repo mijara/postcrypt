@@ -1,0 +1,7 @@
+load users.login.crypt
+
+put {{host}}/users/5be084aadad9db16c1033df9
+{
+    "firstNames": "Marcelo Ignacio",
+    "lastNames": "Jara Almeyda"
+}

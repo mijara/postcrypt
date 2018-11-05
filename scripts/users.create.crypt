@@ -1,0 +1,9 @@
+load users.login.crypt
+
+post {{host}}/users
+{
+    "firstNames": "Usuario",
+    "lastNames": "Testing",
+    "rut": "00000001-K",
+    "password": "admin"
+}

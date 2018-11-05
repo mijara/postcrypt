@@ -11,13 +11,25 @@ class PostStatement(RequestStatement):
         self.body = body
 
 
+class PutStatement(RequestStatement):
+    def __init__(self, url, body):
+        super().__init__('put', url)
+
+        self.body = body
+
+
+class DeleteStatement(RequestStatement):
+    def __init__(self, url):
+        super().__init__('delete', url)
+
+
 class VariableStatement:
     def __init__(self, name, value):
         self.name = name
         self.value = value
 
 
-class SetStatement:
+class HeaderStatement:
     def __init__(self, key, value):
         self.key = key
         self.value = value
@@ -31,3 +43,9 @@ class LoadStatement:
 class GetStatement(RequestStatement):
     def __init__(self, url):
         super().__init__('get', url)
+
+
+class LogStatement:
+    def __init__(self, tag, text):
+        self.tag = tag
+        self.text = text

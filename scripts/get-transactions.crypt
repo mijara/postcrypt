@@ -1,3 +1,0 @@
-load login.crypt
-
-get {{host}}/transactions

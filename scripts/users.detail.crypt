@@ -1,0 +1,5 @@
+load users.login.crypt
+
+var userId = 5be084aadad9db16c1033df9
+
+get {{host}}/users/{{userId}}
