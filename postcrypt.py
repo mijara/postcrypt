@@ -42,7 +42,7 @@ class Postcrypt:
             self.log('response', self.main_file, '>>>')
             print(json.dumps(self.context['response'], indent=2))
         except requests.exceptions.ConnectionError as e:
-            self.error(str(e))
+            self.error(f'{e.response.status_code} {e.response.text}')
 
     def handle_statement(self, statement):
         if isinstance(statement, statements.LoadStatement):

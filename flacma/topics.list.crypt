@@ -1,0 +1,3 @@
+load _settings.crypt
+
+get {{host}}/topics

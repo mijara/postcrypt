@@ -1,0 +1,8 @@
+load users.login.crypt
+
+post {{host}}/companies/5bf2c6582ce3f1968ec1c0df/areas
+{
+  "name": "Gerencia",
+  "owner": "5bf312a4cab4d19ca75b4f2b"
+}
+

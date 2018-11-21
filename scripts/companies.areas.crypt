@@ -1,0 +1,4 @@
+load _settings.crypt
+
+get {{host}}/companies/5bf2c6582ce3f1968ec1c0df/areas
+

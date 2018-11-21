@@ -1,0 +1,7 @@
+load users.login.crypt
+
+put {{host}}/companies/5bf2c6582ce3f1968ec1c0df/areas/5bf4410830dd58a714cc283c
+{
+  "parent": "5bf44282c8955ca7cd2c344f"
+}
+

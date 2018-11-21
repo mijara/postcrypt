@@ -1,0 +1,4 @@
+var apiKey = AIzaSyA63Tn4gW1N3DhzvFTuCCKLEQeyYv4joiQ
+var channel = UCcoGampOoeZW-BWTL8SesyQ
+
+get https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&channelId={{channel}}&maxResults=25&key={{apiKey}}

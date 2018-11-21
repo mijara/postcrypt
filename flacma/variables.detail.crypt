@@ -1,0 +1,5 @@
+load _settings.crypt
+
+input key
+
+get {{host}}/variables/{{key}}

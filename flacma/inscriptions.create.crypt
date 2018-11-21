@@ -1,0 +1,12 @@
+load _settings.crypt
+
+post {{host}}/inscriptions
+{
+    "firstNames": "Marcelo Ignacio",
+    "lastNames": "Jara Almeyda",
+    "email": "marjara36@gmail.com",
+    "documentType": 0,
+    "documentNumber": "18.654.885-K",
+    "country": "Chile",
+    "cityOrDistrict": "Viña del Mar"
+}

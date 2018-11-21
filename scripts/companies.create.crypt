@@ -1,6 +1,18 @@
 load users.login.crypt
 
+input businessName
+input address
+input rut
+input category
+input companyName
+input mainUnit
+
 post {{host}}/companies
 {
-    "name": "My Company"
+    "address": "{{address}}",
+    "businessName": "{{businessName}}",
+    "rut": "{{rut}}",
+    "category": "{{category}}",
+    "name": "{{companyName}}",
+    "mainUnit": "mainUnit"
 }

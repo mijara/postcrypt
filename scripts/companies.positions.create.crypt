@@ -1,0 +1,16 @@
+load users.login.crypt
+
+input companyId
+input positionName
+input positionDescription
+
+post {{host}}/companies/{{companyId}}/positions
+{
+    "name": "{{positionName}}",
+    "description": "{{positionDescription}}",
+    "activities": [
+        "Actividad de Ejemplo 1",
+        "Actividad de Ejemplo 2",
+        "Actividad de Ejemplo 3"
+    ]
+}

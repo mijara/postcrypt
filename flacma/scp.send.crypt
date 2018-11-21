@@ -1,0 +1,17 @@
+load _settings.crypt
+
+post http://localhost:6000/sendGrid
+{
+    "fromEmail": "hello@logopic.app",
+    "fromName": "Natalia de Logopic",
+    "to": [
+        "marcelo@trazolabs.com"
+    ],
+    "subject": "Hello",
+    "data": {
+        "templateId": "d-fa98ad7099a347fca1aebd588f413ff5",
+        "variables": {
+            "testing": "Hernan's CoffeeMaker"
+        }
+    }
+}
