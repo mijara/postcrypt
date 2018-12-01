@@ -1,1 +1,4 @@
 var activities = http://activities.api.flacma.dev.trazolabs.ninja/activities
+var topics = http://activities.api.flacma.dev.trazolabs.ninja/topics
+var speakers = http://activities.api.flacma.dev.trazolabs.ninja/speakers
+var variables = http://general.api.flacma.dev.trazolabs.ninja/variables

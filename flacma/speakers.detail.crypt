@@ -1,5 +1,0 @@
-load _settings.crypt
-
-input id
-
-get {{host}}/speakers/{{id}}

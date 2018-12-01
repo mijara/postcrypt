@@ -15,6 +15,7 @@ class Postcrypt:
     def __init__(self, main_file, mode=None):
         self.main_file = main_file
         self.mode = 'none' if mode is None else mode
+        self.verbose = False
 
         self.base_path = os.path.dirname(main_file)
 
@@ -82,7 +83,8 @@ class Postcrypt:
         for i in range(len(statements) - 1, -1, -1):
             self.statements.insert(0, statements[i])
 
-        self.log('LOAD', load_statement.file_path, f'{len(statements)} statement(s)')
+        if self.verbose:
+            self.log('LOAD', load_statement.file_path, f'{len(statements)} statement(s)')
 
     def _process_response(self, response):
         if response.ok:
@@ -119,7 +121,8 @@ class Postcrypt:
     def handle_variable_statement(self, statement):
         self.context[statement.name] = self.with_context(statement.value)
 
-        self.log('variable', statement.name, self.context[statement.name])
+        if self.verbose:
+            self.log('variable', statement.name, self.context[statement.name])
 
     def handle_header_statement(self, statement):
         self.headers[statement.key] = self.with_context(statement.value)
@@ -140,7 +143,8 @@ class Postcrypt:
 
     def handle_mode_statement(self, statement):
         if statement.mode == self.mode:
-            self.log('MODE', f'{statement.mode}:', 'executing...')
+            if self.verbose:
+                self.log('MODE', f'{statement.mode}:', 'executing...')
         else:
             # skip statements until next mode.
             self.skip_mode = True

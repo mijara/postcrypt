@@ -1,0 +1,11 @@
+load _settings.crypt
+
+mode list
+    get {{topics}}
+
+mode detail
+    input id
+    get {{topics}}/{{id}}
+
+mode none
+    log INFO modes: list, detail
