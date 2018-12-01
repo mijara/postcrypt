@@ -32,16 +32,7 @@ class Postcrypt:
         self.load_file(file_path=self.main_file)
 
         try:
-            # main executor.
-            while len(self.statements) != 0:
-                statement = self.statements.pop(0)
-
-                if self.skip_mode:
-                    if isinstance(statement, statements.ModeStatement) and statement.mode == self.mode:
-                        self.handle_statement(statement)
-                        self.skip_mode = False
-                else:
-                    self.handle_statement(statement)
+            self.execute_loop()
 
             # log the last response.
             if 'response' in self.context:
@@ -52,6 +43,17 @@ class Postcrypt:
                 self.error(f'{e.response.status_code} {e.response.text}')
             else:
                 self.error(f'{e.strerror}')
+
+    def execute_loop(self):
+        while len(self.statements) != 0:
+            statement = self.statements.pop(0)
+
+            if self.skip_mode:
+                if isinstance(statement, statements.ModeStatement) and statement.mode == self.mode:
+                    self.handle_statement(statement)
+                    self.skip_mode = False
+            else:
+                self.handle_statement(statement)
 
     def handle_statement(self, statement):
         if isinstance(statement, statements.LoadStatement):
