@@ -1,5 +1,0 @@
-load _settings.crypt
-
-input id
-
-get {{host}}/activities/{{id}}

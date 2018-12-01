@@ -1,10 +1,11 @@
 load _settings.crypt
 
-log DEBUG outside a mode
-
 mode list
-get {{activities}}
+    get {{activities}}
 
 mode detail
-input id
-get {{activities}}/{{id}}
+    input id
+    get {{activities}}/{{id}}
+
+mode none
+    log INFO modes: list, detail

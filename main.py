@@ -10,5 +10,9 @@ if __name__ == '__main__':
         print(options)
     """
 
-    postcrypt = Postcrypt(sys.argv[1], sys.argv[2])
+    mode = None
+    if len(sys.argv) > 2:
+        mode = sys.argv[2]
+
+    postcrypt = Postcrypt(sys.argv[1], mode)
     postcrypt.process()

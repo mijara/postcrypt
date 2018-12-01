@@ -14,7 +14,7 @@ class Postcrypt:
 
     def __init__(self, main_file, mode=None):
         self.main_file = main_file
-        self.mode = mode
+        self.mode = 'none' if mode is None else mode
 
         self.base_path = os.path.dirname(main_file)
 
@@ -43,8 +43,9 @@ class Postcrypt:
                     self.handle_statement(statement)
 
             # log the last response.
-            self.log('response', self.main_file, '>>>')
-            print(json.dumps(self.context['response'], indent=2))
+            if 'response' in self.context:
+                self.log('response', self.main_file, '>>>')
+                print(json.dumps(self.context['response'], indent=2))
         except requests.exceptions.ConnectionError as e:
             if e.response is not None:
                 self.error(f'{e.response.status_code} {e.response.text}')
