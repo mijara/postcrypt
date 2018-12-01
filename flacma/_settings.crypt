@@ -1,1 +1,1 @@
-var host = http://localhost:5000
+var activities = http://activities.api.flacma.dev.trazolabs.ninja/activities

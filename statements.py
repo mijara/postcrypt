@@ -4,6 +4,11 @@ class RequestStatement:
         self.url = url
 
 
+class GetStatement(RequestStatement):
+    def __init__(self, url):
+        super().__init__('get', url)
+
+
 class PostStatement(RequestStatement):
     def __init__(self, url, body):
         super().__init__('post', url)
@@ -40,11 +45,6 @@ class LoadStatement:
         self.file_path = file_path
 
 
-class GetStatement(RequestStatement):
-    def __init__(self, url):
-        super().__init__('get', url)
-
-
 class LogStatement:
     def __init__(self, tag, text):
         self.tag = tag
@@ -54,3 +54,8 @@ class LogStatement:
 class InputStatement:
     def __init__(self, variable):
         self.variable = variable
+
+
+class ModeStatement:
+    def __init__(self, mode):
+        self.mode = mode

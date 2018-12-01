@@ -1,24 +1,20 @@
 import json
 import os
-import sys
-import time
-from queue import Queue
 
 import pystache
+import requests
 from termcolor import colored
-from urllib3.exceptions import NewConnectionError
 
 import statements
 from parser import Parser
-from statements import PostStatement, LoadStatement, VariableStatement, HeaderStatement, GetStatement
-import requests
 
 
 class Postcrypt:
     verbs = ['variable', 'request', 'header', 'get']
 
-    def __init__(self, main_file):
+    def __init__(self, main_file, mode=None):
         self.main_file = main_file
+        self.mode = mode
 
         self.base_path = os.path.dirname(main_file)
 
@@ -29,6 +25,7 @@ class Postcrypt:
         self.context = {}
         self.headers = {}
         self.last_response = {}
+        self.skip_mode = False
 
     def process(self):
         self.load_file(file_path=self.main_file)
@@ -36,13 +33,23 @@ class Postcrypt:
         try:
             # main executor.
             while len(self.statements) != 0:
-                self.handle_statement(self.statements.pop(0))
+                statement = self.statements.pop(0)
+
+                if self.skip_mode:
+                    if isinstance(statement, statements.ModeStatement) and statement.mode == self.mode:
+                        self.handle_statement(statement)
+                        self.skip_mode = False
+                else:
+                    self.handle_statement(statement)
 
             # log the last response.
             self.log('response', self.main_file, '>>>')
             print(json.dumps(self.context['response'], indent=2))
         except requests.exceptions.ConnectionError as e:
-            self.error(f'{e.response.status_code} {e.response.text}')
+            if e.response is not None:
+                self.error(f'{e.response.status_code} {e.response.text}')
+            else:
+                self.error(f'{e.strerror}')
 
     def handle_statement(self, statement):
         if isinstance(statement, statements.LoadStatement):
@@ -63,6 +70,8 @@ class Postcrypt:
             self.handle_log_statement(statement)
         elif isinstance(statement, statements.InputStatement):
             self.handle_input_statement(statement)
+        elif isinstance(statement, statements.ModeStatement):
+            self.handle_mode_statement(statement)
 
     def handle_load_statement(self, load_statement):
         parser = Parser(os.path.join(self.base_path, load_statement.file_path))
@@ -127,6 +136,13 @@ class Postcrypt:
         self.log('INPUT', f'{statement.variable}:', '', end='')
         value = input()
         self.context[statement.variable] = value
+
+    def handle_mode_statement(self, statement):
+        if statement.mode == self.mode:
+            self.log('MODE', f'{statement.mode}:', 'executing...')
+        else:
+            # skip statements until next mode.
+            self.skip_mode = True
 
     def load_file(self, file_path):
         parser = Parser(file_path)

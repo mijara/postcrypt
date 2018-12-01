@@ -96,6 +96,11 @@ class Parser:
 
         return statements.LogStatement(tag, text)
 
+    def parse_mode(self):
+        mode = self.next_token()
+
+        return statements.ModeStatement(mode)
+
     def parse_statement(self):
         token = self.next_token()
 
@@ -117,6 +122,8 @@ class Parser:
             return self.parse_header()
         elif token == 'log':
             return self.parse_log()
+        elif token == 'mode':
+            return self.parse_mode()
         elif token:
             raise Parser.ParseError(f'unexpected token {token}')
 

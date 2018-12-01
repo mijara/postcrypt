@@ -1,8 +1,0 @@
-post http://articles-env.cn5ceemihx.us-east-2.elasticbeanstalk.com/articles
-{
-    "headline": "Title 2",
-    "body": "Body",
-    "author": {
-        "id": 2
-    }
-}

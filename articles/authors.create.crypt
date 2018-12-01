@@ -1,5 +1,0 @@
-post http://articles-env.cn5ceemihx.us-east-2.elasticbeanstalk.com/authors
-{
-    "firstNames": "Hernan Raul",
-    "lastNames": "Herreros Niño"
-}
