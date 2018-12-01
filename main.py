@@ -10,6 +10,7 @@ def create_arg_parser():
     parser.add_argument('crypt', type=str, help='Scrypt to run')
     parser.add_argument('mode', type=str, nargs='?', help='Optional scrypt mode')
     parser.add_argument('--verbose', action='store_true', help='Enable verbose mode')
+    parser.add_argument('--save', action='store_true', help='Remember input values')
 
     return parser
 

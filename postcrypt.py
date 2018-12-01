@@ -33,11 +33,8 @@ class Postcrypt:
 
         try:
             self.execute_loop()
+            self.log_last_response()
 
-            # log the last response.
-            if 'response' in self.context:
-                self.log('response', self.main_file, '>>>')
-                print(json.dumps(self.context['response'], indent=2))
         except requests.exceptions.ConnectionError as e:
             if e.response is not None:
                 self.error(f'{e.response.status_code} {e.response.text}')
@@ -54,6 +51,11 @@ class Postcrypt:
                     self.skip_mode = False
             else:
                 self.handle_statement(statement)
+
+    def log_last_response(self):
+        if 'response' in self.context:
+            self.log('response', self.main_file, '>>>')
+            print(json.dumps(self.context['response'], indent=2))
 
     def handle_statement(self, statement):
         if isinstance(statement, statements.LoadStatement):
