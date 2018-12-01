@@ -12,10 +12,10 @@ from parser import Parser
 class Postcrypt:
     verbs = ['variable', 'request', 'header', 'get']
 
-    def __init__(self, main_file, mode=None):
+    def __init__(self, main_file, mode=None, verbose=False):
         self.main_file = main_file
         self.mode = 'none' if mode is None else mode
-        self.verbose = False
+        self.verbose = verbose
 
         self.base_path = os.path.dirname(main_file)
 
