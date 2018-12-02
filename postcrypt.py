@@ -6,20 +6,27 @@ import requests
 from termcolor import colored
 
 import statements
+from input_storage import InputStorage
 from parser import Parser
 
 
 class Postcrypt:
     verbs = ['variable', 'request', 'header', 'get']
 
-    def __init__(self, main_file, mode=None, verbose=False):
+    def __init__(self, main_file, mode=None, verbose=False, save=False):
         self.main_file = main_file
         self.mode = 'none' if mode is None else mode
         self.verbose = verbose
+        self.save = save
 
-        self.base_path = os.path.dirname(main_file)
+        self.base_dir = os.path.dirname(os.path.abspath(main_file))
 
         self.just = max(len(v) for v in Postcrypt.verbs)
+
+        self.input_storage = InputStorage(self.base_dir)
+
+        # saved input values.
+        self.saved_input = {} if not save else self.input_storage.initialize()
 
         # execution variables.
         self.statements = []
@@ -80,7 +87,7 @@ class Postcrypt:
             self.handle_mode_statement(statement)
 
     def handle_load_statement(self, load_statement):
-        parser = Parser(os.path.join(self.base_path, load_statement.file_path))
+        parser = Parser(os.path.join(self.base_dir, load_statement.file_path))
 
         statements = parser.process()
 
@@ -141,9 +148,21 @@ class Postcrypt:
         print(text)
 
     def handle_input_statement(self, statement):
-        self.log('INPUT', f'{statement.variable}:', '', end='')
-        value = input()
+        if statement.variable in self.saved_input:
+            self.log('INPUT', f'{statement.variable}', f'[{self.saved_input[statement.variable]}]: ', end='')
+            value = input()
+
+            if value == '':
+                value = self.saved_input[statement.variable]
+        else:
+            self.log('INPUT', f'{statement.variable}:', '', end='')
+            value = input()
+
         self.context[statement.variable] = value
+        self.saved_input[statement.variable] = value
+
+        if self.save:
+            self.input_storage.store(self.saved_input)
 
     def handle_mode_statement(self, statement):
         if statement.mode == self.mode:

@@ -17,5 +17,5 @@ def create_arg_parser():
 
 if __name__ == '__main__':
     args = create_arg_parser().parse_args()
-    postcrypt = Postcrypt(args.crypt, mode=args.mode, verbose=args.verbose)
+    postcrypt = Postcrypt(args.crypt, mode=args.mode, verbose=args.verbose, save=args.save)
     postcrypt.process()
