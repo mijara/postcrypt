@@ -4,11 +4,8 @@ import requests
 
 
 def process_request(method, url, *args, **kwargs):
-    res = getattr(requests, method)(url, *args, **kwargs)
-    return process_response(res)
+    response = getattr(requests, method)(url, *args, **kwargs)
 
-
-def process_response(response):
     if response.ok:
         return json.loads(response.text)
     else:

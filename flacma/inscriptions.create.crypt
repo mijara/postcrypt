@@ -1,6 +1,6 @@
 load _settings.crypt
 
-post {{host}}/inscriptions
+post {{inscriptions}}
 {
     "firstNames": "Marcelo Ignacio",
     "lastNames": "Jara Almeyda",

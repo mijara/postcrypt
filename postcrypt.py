@@ -1,20 +1,25 @@
 import json
 import os
 
-import pystache
 import requests
-from termcolor import colored
 
+from handlers.input_handler import InputHandler
+from handlers.load_handler import LoadHandler
+from handlers.mode_handler import ModeHandler
+from handlers.variable_handler import VariableHandler
+from process_queue import ProcessQueue
+from handlers.header_handler import HeaderHandler
+from handlers.log_handler import LogHandler
+from handlers.request_handler import GetRequestHandler, PostRequestHandler, PutRequestHandler, DeleteRequestHandler
 import handlers
 import statements
+from context import Context
 from input_storage import InputStorage
 from logger import Logger
 from parser import Parser
 
 
 class Postcrypt:
-    verbs = ['variable', 'request', 'header', 'get']
-
     def __init__(self, main_file, mode=None, verbose=False, save=False):
         self.main_file = main_file
         self.mode = 'none' if mode is None else mode
@@ -23,20 +28,18 @@ class Postcrypt:
 
         self.base_dir = os.path.dirname(os.path.abspath(main_file))
 
-        self.input_storage = InputStorage(self.base_dir)
-        self.logger = Logger(max(len(v) for v in Postcrypt.verbs))
+        self.input_storage = InputStorage(self.base_dir, save)
+        self.logger = Logger(16, self.verbose)
+        self.process_queue = ProcessQueue(self.mode)
 
-        # saved input values.
-        self.saved_input = {} if not save else self.input_storage.initialize()
-
+        # handlers for file events.
         self.handlers = {}
 
         # execution variables.
-        self.statements = []
-        self.context = {}
-        self.headers = {}
         self.last_response = {}
         self.skip_mode = False
+
+        self.context = Context()
 
     def process(self):
         self.load_file(file_path=self.main_file)
@@ -52,8 +55,8 @@ class Postcrypt:
                 self.logger.error(f'{e.strerror}')
 
     def execute_loop(self):
-        while len(self.statements) != 0:
-            statement = self.statements.pop(0)
+        while self.process_queue.has_next():
+            statement = self.process_queue.pop()
 
             if self.skip_mode:
                 if isinstance(statement, statements.ModeStatement) and statement.mode == self.mode:
@@ -63,39 +66,44 @@ class Postcrypt:
                 self.handle_statement(statement)
 
     def log_last_response(self):
-        if 'response' in self.context:
+        if self.context.has_var('response'):
             self.logger.log('response', self.main_file, '>>>')
-            print(json.dumps(self.context['response'], indent=2))
+            print(json.dumps(self.context.get_var('response'), indent=2))
 
     def handle_statement(self, statement):
         self.handlers[statement.__class__](self, statement)
 
     def load_file(self, file_path):
         parser = Parser(file_path)
-
-        for statement in parser.process():
-            self.statements.append(statement)
-
-    def with_context(self, value):
-        return pystache.render(value, self.context)
-
-    def with_context_and_headers(self, value):
-        context = {}
-        context.update(self.context)
-        context.update(self.headers)
-        return pystache.render(value, context)
+        self.process_queue.insert_all(parser.process())
 
     def add_handler(self, clazz, handler):
         self.handlers[clazz] = handler
 
     def make_default(self):
-        self.add_handler(statements.LoadStatement, handlers.handle_load_statement)
-        self.add_handler(statements.ModeStatement, handlers.handle_mode_statement)
-        self.add_handler(statements.InputStatement, handlers.handle_input_statement)
-        self.add_handler(statements.DeleteStatement, handlers.handle_delete_statement)
-        self.add_handler(statements.PutStatement, handlers.handle_put_statement)
-        self.add_handler(statements.GetStatement, handlers.handle_get_statement)
-        self.add_handler(statements.HeaderStatement, handlers.handle_header_statement)
-        self.add_handler(statements.LogStatement, handlers.handle_log_statement)
-        self.add_handler(statements.PostStatement, handlers.handle_post_statement)
-        self.add_handler(statements.VariableStatement, handlers.handle_variable_statement)
+        get_handler = GetRequestHandler(self.context, self.logger)
+        post_handler = PostRequestHandler(self.context, self.logger)
+        put_handler = PutRequestHandler(self.context, self.logger)
+        delete_handler = DeleteRequestHandler(self.context, self.logger)
+        header_handler = HeaderHandler(self.context, self.logger)
+        log_handler = LogHandler(self.context, self.logger)
+        mode_handler = ModeHandler(self.context, self.logger, self.process_queue)
+
+        variable_handler = VariableHandler(self.context, self.logger)
+
+        load_handler = LoadHandler(self.context, self.logger)
+        load_handler.set_process_queue(self.process_queue)
+        load_handler.set_base_dir(self.base_dir)
+
+        input_handler = InputHandler(self.context, self.logger, self.input_storage)
+
+        self.add_handler(statements.LoadStatement, lambda x, y: load_handler.handle(y))
+        self.add_handler(statements.ModeStatement, lambda x, y: mode_handler.handle(y))
+        self.add_handler(statements.InputStatement, lambda x, y: input_handler.handle(y))
+        self.add_handler(statements.DeleteStatement, lambda x, y: delete_handler.handle(y))
+        self.add_handler(statements.PutStatement, lambda x, y: put_handler.handle(y))
+        self.add_handler(statements.GetStatement, lambda x, y: get_handler.handle(y))
+        self.add_handler(statements.PostStatement, lambda x, y: post_handler.handle(y))
+        self.add_handler(statements.HeaderStatement, lambda x, y: header_handler.handle(y))
+        self.add_handler(statements.LogStatement, lambda x, y: log_handler.handle(y))
+        self.add_handler(statements.VariableStatement, lambda x, y: variable_handler.handle(y))

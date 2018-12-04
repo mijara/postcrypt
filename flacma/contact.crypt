@@ -1,0 +1,10 @@
+load _settings.crypt
+
+post {{contact}}
+{
+    "fullName": "Marcelo Jara",
+    "email": "marcelo@trazolabs.com",
+    "country": "chile",
+    "content": "Some content",
+    "subject": "Some subject"
+}
