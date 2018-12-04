@@ -1,7 +1,7 @@
-from context import Context
-from handler import Handler
-from input_storage import InputStorage
-from logger import Logger
+from services.context import Context
+from handlers.handler import Handler
+from services.input_storage import InputStorage
+from services.logger import Logger
 
 
 class InputHandler(Handler):

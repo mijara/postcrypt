@@ -1,6 +1,6 @@
-from handler import Handler
-from logger import Logger
-from process_queue import ProcessQueue
+from handlers.handler import Handler
+from services.logger import Logger
+from services.process_queue import ProcessQueue
 
 
 class ModeHandler(Handler):

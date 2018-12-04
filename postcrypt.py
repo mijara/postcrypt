@@ -6,9 +6,9 @@ from typing import Type
 import requests
 
 import statements
-from context import Context
-from environment import Environment
-from handler import Handler
+from services.context import Context
+from services.environment import Environment
+from handlers.handler import Handler
 from handlers.header_handler import HeaderHandler
 from handlers.input_handler import InputHandler
 from handlers.load_handler import LoadHandler
@@ -16,10 +16,10 @@ from handlers.log_handler import LogHandler
 from handlers.mode_handler import ModeHandler
 from handlers.request_handler import GetRequestHandler, PostRequestHandler, PutRequestHandler, DeleteRequestHandler
 from handlers.variable_handler import VariableHandler
-from input_storage import InputStorage
-from logger import Logger
+from services.input_storage import InputStorage
+from services.logger import Logger
 from parser import Parser
-from process_queue import ProcessQueue
+from services.process_queue import ProcessQueue
 
 
 class Postcrypt:

@@ -1,10 +1,10 @@
 import os
 
-from environment import Environment
-from handler import Handler
-from logger import Logger
+from services.environment import Environment
+from handlers.handler import Handler
+from services.logger import Logger
 from parser import Parser
-from process_queue import ProcessQueue
+from services.process_queue import ProcessQueue
 
 
 class LoadHandler(Handler):
