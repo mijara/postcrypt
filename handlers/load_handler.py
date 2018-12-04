@@ -1,25 +1,21 @@
 import os
 
+from environment import Environment
 from handler import Handler
+from logger import Logger
 from parser import Parser
+from process_queue import ProcessQueue
 
 
 class LoadHandler(Handler):
-    def __init__(self, context, logger):
-        super().__init__(context, logger)
-        self.process_queue = None
-        self._base_dir = None
+    process_queue: ProcessQueue
+    environment: Environment
+    logger: Logger
 
     def handle(self, statement):
-        parser = Parser(os.path.join(self._base_dir, statement.file_path))
+        parser = Parser(os.path.join(self.environment.base_dir, statement.file_path))
         statements = parser.process()
         self.process_queue.insert_all(statements)
 
         if self.logger.verbose:
             self.logger.log('LOAD', statement.file_path, f'{len(statements)} statement(s)')
-
-    def set_process_queue(self, process_queue):
-        self.process_queue = process_queue
-
-    def set_base_dir(self, base_dir):
-        self._base_dir = base_dir

@@ -1,15 +1,22 @@
+from context import Context
 from handler import Handler
 from input_storage import InputStorage
+from logger import Logger
 
 
 class InputHandler(Handler):
-    def __init__(self, context, logger, input_storage):
-        super().__init__(context, logger)
-        self.input_storage: InputStorage = input_storage
+    context: Context
+    logger: Logger
+    input_storage: InputStorage
 
     def handle(self, statement):
         if self.input_storage.has_input(statement.variable):
-            self.logger.log('INPUT', f'{statement.variable}', f'[{self.input_storage.get_input(statement.variable)}]: ', end='')
+            self.logger.log(
+                'INPUT', f'{statement.variable}',
+                f'[{self.input_storage.get_input(statement.variable)}]: ',
+                end=''
+            )
+
             value = input()
 
             if value == '':

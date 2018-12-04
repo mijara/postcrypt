@@ -1,12 +1,11 @@
 from handler import Handler
+from logger import Logger
 from process_queue import ProcessQueue
 
 
 class ModeHandler(Handler):
-    def __init__(self, context, logger, process_queue):
-        super().__init__(context, logger)
-
-        self.process_queue: ProcessQueue = process_queue
+    process_queue: ProcessQueue
+    logger: Logger
 
     def handle(self, statement):
         if statement.mode == self.process_queue.mode:

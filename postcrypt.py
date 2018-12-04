@@ -1,22 +1,25 @@
+import inspect
 import json
 import os
+from typing import Type
 
 import requests
 
-from handlers.input_handler import InputHandler
-from handlers.load_handler import LoadHandler
-from handlers.mode_handler import ModeHandler
-from handlers.variable_handler import VariableHandler
-from process_queue import ProcessQueue
-from handlers.header_handler import HeaderHandler
-from handlers.log_handler import LogHandler
-from handlers.request_handler import GetRequestHandler, PostRequestHandler, PutRequestHandler, DeleteRequestHandler
-import handlers
 import statements
 from context import Context
+from environment import Environment
+from handler import Handler
+from handlers.header_handler import HeaderHandler
+from handlers.input_handler import InputHandler
+from handlers.load_handler import LoadHandler
+from handlers.log_handler import LogHandler
+from handlers.mode_handler import ModeHandler
+from handlers.request_handler import GetRequestHandler, PostRequestHandler, PutRequestHandler, DeleteRequestHandler
+from handlers.variable_handler import VariableHandler
 from input_storage import InputStorage
 from logger import Logger
 from parser import Parser
+from process_queue import ProcessQueue
 
 
 class Postcrypt:
@@ -28,18 +31,15 @@ class Postcrypt:
 
         self.base_dir = os.path.dirname(os.path.abspath(main_file))
 
+        # services.
+        self.environment = Environment(self.base_dir)
         self.input_storage = InputStorage(self.base_dir, save)
         self.logger = Logger(16, self.verbose)
         self.process_queue = ProcessQueue(self.mode)
-
-        # handlers for file events.
-        self.handlers = {}
-
-        # execution variables.
-        self.last_response = {}
-        self.skip_mode = False
-
         self.context = Context()
+
+        # handlers for events.
+        self.handlers = {}
 
     def process(self):
         self.load_file(file_path=self.main_file)
@@ -57,13 +57,7 @@ class Postcrypt:
     def execute_loop(self):
         while self.process_queue.has_next():
             statement = self.process_queue.pop()
-
-            if self.skip_mode:
-                if isinstance(statement, statements.ModeStatement) and statement.mode == self.mode:
-                    self.handle_statement(statement)
-                    self.skip_mode = False
-            else:
-                self.handle_statement(statement)
+            self.handle_statement(statement)
 
     def log_last_response(self):
         if self.context.has_var('response'):
@@ -71,39 +65,47 @@ class Postcrypt:
             print(json.dumps(self.context.get_var('response'), indent=2))
 
     def handle_statement(self, statement):
-        self.handlers[statement.__class__](self, statement)
+        self.handlers[statement.__class__].handle(statement)
 
     def load_file(self, file_path):
         parser = Parser(file_path)
         self.process_queue.insert_all(parser.process())
 
-    def add_handler(self, clazz, handler):
+    def add_handler(self, clazz, handler_clazz: Type[Handler]):
+        # inject dependencies
+        handler = handler_clazz()
+
+        attributes = inspect.getmembers(handler_clazz, lambda a: not (inspect.isroutine(a)))
+
+        required = list(a for a in attributes if a[0] == '__annotations__')
+
+        if len(required) > 0:
+            required = required[0][1]
+        else:
+            required = {}
+
+        for k, v in required.items():
+            if v == Context:
+                setattr(handler, k, self.context)
+            if v == Logger:
+                setattr(handler, k, self.logger)
+            if v == ProcessQueue:
+                setattr(handler, k, self.process_queue)
+            if v == InputStorage:
+                setattr(handler, k, self.input_storage)
+            if v == Environment:
+                setattr(handler, k, self.environment)
+
         self.handlers[clazz] = handler
 
     def make_default(self):
-        get_handler = GetRequestHandler(self.context, self.logger)
-        post_handler = PostRequestHandler(self.context, self.logger)
-        put_handler = PutRequestHandler(self.context, self.logger)
-        delete_handler = DeleteRequestHandler(self.context, self.logger)
-        header_handler = HeaderHandler(self.context, self.logger)
-        log_handler = LogHandler(self.context, self.logger)
-        mode_handler = ModeHandler(self.context, self.logger, self.process_queue)
-
-        variable_handler = VariableHandler(self.context, self.logger)
-
-        load_handler = LoadHandler(self.context, self.logger)
-        load_handler.set_process_queue(self.process_queue)
-        load_handler.set_base_dir(self.base_dir)
-
-        input_handler = InputHandler(self.context, self.logger, self.input_storage)
-
-        self.add_handler(statements.LoadStatement, lambda x, y: load_handler.handle(y))
-        self.add_handler(statements.ModeStatement, lambda x, y: mode_handler.handle(y))
-        self.add_handler(statements.InputStatement, lambda x, y: input_handler.handle(y))
-        self.add_handler(statements.DeleteStatement, lambda x, y: delete_handler.handle(y))
-        self.add_handler(statements.PutStatement, lambda x, y: put_handler.handle(y))
-        self.add_handler(statements.GetStatement, lambda x, y: get_handler.handle(y))
-        self.add_handler(statements.PostStatement, lambda x, y: post_handler.handle(y))
-        self.add_handler(statements.HeaderStatement, lambda x, y: header_handler.handle(y))
-        self.add_handler(statements.LogStatement, lambda x, y: log_handler.handle(y))
-        self.add_handler(statements.VariableStatement, lambda x, y: variable_handler.handle(y))
+        self.add_handler(statements.LoadStatement, LoadHandler)
+        self.add_handler(statements.ModeStatement, ModeHandler)
+        self.add_handler(statements.InputStatement, InputHandler)
+        self.add_handler(statements.DeleteStatement, DeleteRequestHandler)
+        self.add_handler(statements.PutStatement, PutRequestHandler)
+        self.add_handler(statements.GetStatement, GetRequestHandler)
+        self.add_handler(statements.PostStatement, PostRequestHandler)
+        self.add_handler(statements.HeaderStatement, HeaderHandler)
+        self.add_handler(statements.LogStatement, LogHandler)
+        self.add_handler(statements.VariableStatement, VariableHandler)

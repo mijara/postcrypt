@@ -3,10 +3,15 @@ from abc import ABC
 
 import requests
 
+from context import Context
 from handler import Handler
+from logger import Logger
 
 
 class RequestHandler(Handler, ABC):
+    logger: Logger
+    context: Context
+
     def make_request(self, method, url, *args, **kwargs):
         self.logger.log('request', method, url)
 
